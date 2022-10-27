@@ -1,29 +1,37 @@
 #!/bin/bash
 #
+# Wrapper script to run the bactmap nextflow pipeline, see https://nf-co.re/bactmap/1.0.0
 # Author: Jacqui Keane <drjkeane at gmail.com>
 #
-# Usage: run_bactmap.sh [-h] -d input_directory -r reference.fasta
+# Usage: run_bactmap.sh [-h] [-g] [-t tree_software] -i input_directory -r reference.fasta -o output_directory
+#
+
+# Parameterise number of jobs?
 #
 
 export NXF_ANSI_LOG=false
 export NXF_OPTS="-Xms8G -Xmx8G -Dnxf.pool.maxThreads=2000"
 export NXF_VER=21.10.6
+export SOFTWARE_HOME="/home/software"
 
 function help
 {
    # Display Help
    script=$(basename $0)
    echo 
-   echo "usage: "$script" [-h] -i input_directory -r reference"
+   echo "usage: "$script" [-h] -i input_directory -r reference -o outout_directory"
    echo
    echo "Runs the bactmap nextflow pipeline, see https://nf-co.re/bactmap/1.0.0"
    echo
    echo "optional arguments:"
-   echo "  -h, --help		show this help message and exit"
+   echo "  -h			show this help message and exit"
+   echo "  -g			remove recombination using gubbins"
+   echo "  -t 			tree building software to use, choose from fasttree, iqtree, rapidnj or raxml, default is iqtree"
    echo
    echo "required arguments:"
-   echo "  -i input_directory	directory containing a CSV file 'samplesheet.csv' that contains the paths to your FASTQ files - see https://nf-co.re/bactmap/1.0.0/usage"
+   echo "  -i input		input CSV file 'samplesheet.csv' that contains the paths to your FASTQ files - see https://nf-co.re/bactmap/1.0.0/usage"
    echo "  -r reference		reference fasta file"
+   echo "  -o output_directory	directory to write the pipeline output to"
    echo
    echo "To run this pipeline with alternative parameters, copy this script and make changes to nextflow run as required"
    echo
@@ -33,7 +41,7 @@ function help
 
 NAG=$#
 
-if [ $NAG -ne 1 ] && [ $NAG -ne 4 ] && [ $NAG -ne 5 ]
+if [ $NAG -ne 1 ] && [ $NAG -ne 6 ] && [ $NAG -ne 7 ] && [ $NAG -ne 8 ] && [ $NAG -ne 9 ] && [ $NAG -ne 10 ]
 then
   help
   echo "!!! Please provide the correct number of input arguments"
@@ -41,34 +49,45 @@ then
   exit;
 fi
 
+# Set default variables
+
+TREE='iqtree'
+GUBBINS=''
+
 # Get the options
-while getopts "hi:r:" option; do
+while getopts "htgi:r:o:" option; do
    case $option in
       h) # display help
          help
          exit;;
-      i) # Input directory
-         INPUT_DIR=$OPTARG;;
-      r) #  Reference
+      t) # tree software
+         TREE=$OPTARGS
+      g) # remove recombination
+         GUBBINS='--remove_recombination'
+      i) # input directory
+         INPUT=$OPTARG;;
+      r) #  reference
          REF=$OPTARG;;
-     \?) # Invalid option
+      o) # output directory
+         OUTPUT=$OPTARG;;
+     \?) # invalid option
          help
 	 echo "!!!Error: Invalid arguments"
          exit;;
    esac
 done
 
-# Check the input directory and reference genome exists
+# Check the tree option is valid
 
-INPUT=${INPUT_DIR}/"samplesheet.csv"
-
-if [ ! -d $INPUT_DIR ]
+if [ $TREE -ne 'fasttree' ] && [ $TREE -ne 'rapidnj' ] && [ $TREE -ne 'raxmlng' ] && [ $TREE -ne 'iqtree']
 then
   help
-  echo "!!! The directory $INPUT_DIR does not exist"
+  echo "!!! Please provide the correct option for tree building software, choose from fasttree, rapidnf, raxmlng or iqtree
   echo
   exit;
 fi
+
+# Check the input file, reference genome and output directory exists
 
 if [ ! -f $INPUT ]
 then
@@ -86,10 +105,19 @@ then
   exit;
 fi
 
+
+if [ ! -d $OUTPUT ]
+then
+  help
+  echo "!!! The directory $OUTPUT does not exist"
+  echo
+  exit;
+fi
+
 RAND=$(date +%s%N | cut -b10-19)
-OUT_DIR=${INPUT_DIR}/bactmap-1.0.0_${RAND}
+OUT_DIR=${OUTPUT}/bactmap-1.0.0_${RAND}
 WORK_DIR=${OUT_DIR}/work
-NEXTFLOW_PIPELINE_DIR='/home/software/nf-pipelines/nf-core-bactmap-1.0.0'
+NEXTFLOW_PIPELINE_DIR='$SOFTWARE_HOME/nf-pipelines/nf-core-bactmap-1.0.0'
 
 echo "Pipeline is: "$NEXTFLOW_PIPELINE_DIR
 echo "Input file is: "$INPUT
@@ -99,11 +127,12 @@ nextflow run ${NEXTFLOW_PIPELINE_DIR}/workflow/main.nf \
 --input ${INPUT_DIR}/samplesheet.csv \
 --outdir ${OUT_DIR} \
 --reference ${REF} \
---iqtree \
+--${TREE}
 -w ${WORK_DIR} \
 -profile singularity \
 -with-tower -resume \
--c /home/software/nf_pipeline_scripts/conf/bakersrv1.config,/home/software/nf_pipeline_scripts/conf/pipelines/bactmap.config
+-c $SOFTWARE_HOME/nf_pipeline_scripts/conf/bakersrv1.config,$SOFTWARE_HOME/nf_pipeline_scripts/conf/pipelines/bactmap.config \
+${GUBBINS}
 
 # Clean up on sucess/exit 0
 status=$?

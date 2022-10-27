@@ -37,7 +37,7 @@ then
 fi
 
 # Get the options
-while getopts "hi:r:" option; do
+while getopts "hs:i:" option; do
    case $option in
       h) # display help
          help
@@ -88,7 +88,7 @@ then
     ${NEXTFLOW_PIPELINE_DIR}/main.nf \
     --input_dir ${INPUT_DIR} \
     --fastq_pattern '*{R,_}{1,2}.f*q.gz' \
-    --output_dir ${OUT_DIR}
+    --output_dir ${OUT_DIR} \
     --read_polishing_adapter_file ${NEXFLOW_PIPELINE_DIR}/adapters.fas \
     --read_polishing_depth_cutoff 100 \
     --species ${ARIBA_POINTFINDER_SPECIES} \
@@ -100,7 +100,7 @@ else
     ${NEXTFLOW_PIPELINE_DIR}/main.nf \
     --input_dir ${INPUT_DIR} \
     --fastq_pattern '*{R,_}{1,2}.f*q.gz' \
-    --output_dir ${OUT_DIR}
+    --output_dir ${OUT_DIR} \
     --read_polishing_adapter_file ${NEXFLOW_PIPELINE_DIR}/adapters.fas \
     --read_polishing_depth_cutoff 100 \
     -w ${WORK_DIR} \

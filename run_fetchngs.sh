@@ -2,7 +2,7 @@
 #
 # Author: Jacqui Keane <drjkeane at gmail.com>
 #
-# Usage: run_fetchngs.sh [-h] -i accessions -o output_directory
+# Usage: run_fetchngs.sh [-h] -i accessions.txt -o output_directory
 #
 
 export NXF_ANSI_LOG=false
@@ -14,7 +14,7 @@ function help
    # Display Help
    script=$(basename $0)
    echo 
-   echo "usage: "$script" [-h] -f accessions -o output_directory"
+   echo "usage: "$script" [-h] -i accessions.txt -o output_directory"
    echo
    echo "Runs the fetchngs nextflow pipeline, see https://nf-co.re/fetchngs/1.5"
    echo

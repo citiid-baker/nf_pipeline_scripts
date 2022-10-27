@@ -229,7 +229,7 @@ fi
 RAND=$(date +%s%N | cut -b10-19)
 OUT_DIR=${INPUT_DIR}/ghru-mlst-1.4_${RAND}
 WORK_DIR=${OUT_DIR}/work
-NEXTFLOW_PIPELINE_DIR='/home/software/nf-pipelines/mlst-1.4'
+NEXTFLOW_PIPELINE_DIR='/home/software/nf-pipelines/mlst-1.2'
 MLST_SPECIES=$(echo ${VALID_SPECIES} | sed -e 's/^\(.\)/\U\1/' | sed -e 's/_/ /g')
 
 echo "Pipeline is: "$NEXTFLOW_PIPELINE_DIR
@@ -237,7 +237,7 @@ echo "Input data is: "$INPUT_DIR
 echo "Output will be written to: "$OUT_DIR
 
 nextflow run \
-${NEXTFLOW_PIPELINE_DIR}/mlst-1.4/main.nf \
+${NEXTFLOW_PIPELINE_DIR}/main.nf \
 --input_dir ${INPUT_DIR} \
 --fastq_pattern '*{R,_}{1,2}.f*q.gz' \
 --output_dir ${OUT_DIR} \

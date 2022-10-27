@@ -71,7 +71,7 @@ then
   exit;
 fi
 
-if [ ! -f $FASTA]
+if [ ! -f $FASTA ]
 then
   help
   echo "!!! The file $FASTA does not exist"
@@ -79,7 +79,7 @@ then
   exit;
 fi
 
-if [ ! -f $GTF]
+if [ ! -f $GTF ]
 then
   help
   echo "!!! The file $GTF does not exist"
